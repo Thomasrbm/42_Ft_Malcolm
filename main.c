@@ -151,5 +151,12 @@ int main(int ac, char **av)
 	struct arp_packet *arp = (struct arp_packet *)(buffer + 14); // les restat dans la partie tram arp
 	
 	
+
+	//  reste a 
+
+	// checker arp->opcode  == 1 (opcode veut dire : )  1 = request     2 arp reply   (3 et 4 obsoletes)
+ 	// dest ip ==  l ip qu on usurpe (source ip converted)
+	// src ip = target == bien la personne que j arnaque
+
 	return 0;
 }
