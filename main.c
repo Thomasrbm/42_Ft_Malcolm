@@ -1,7 +1,4 @@
-#include <stdint.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <arpa/inet.h>
+#include "ft_malcolm.h"
 
 int MAC_getter(char *to_convert, uint8_t *converted)
 {
@@ -78,5 +75,81 @@ int main(int ac, char **av)
 		return 1;
 	
 
+
+	int sockfd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));  // Af = Adresse familly (INET ipv4 = TCP/UDP etc.) ici AF_PACKET  =    layer 2 Ethernet/ARP ,              SOCK RAW = le kernell donne la trame brut.  (STREAM, tcp gere tout,  DGRAM  UDP le kernelle gere et envoi paquetes isoles ),       irc c etait 0 (tcp devine), ici c est ETH_P_ARP      filtre trames ARP, kernell check et evoit que les trames ARP                  
+	if (sockfd < 0)
+	{
+		perror("socket");
+		return 1;
+	}
+	// pour l isntant juste la structure, le socket ne sait pas OU ecouter
+
+	// faut bind.
+
+
+
+
+
+	struct ifaddrs *ifaddr; // besoin de  struct sockaddr_ll  pour 
+	if (getifaddrs(&ifaddr) < 0)// demande au kernell tout les interface reseaux actives, remplit une liste chaine avec tout 
+	{
+		perror("getifaddrs");
+		return 1;
+	}
+
+	struct ifaddrs *ptr = ifaddr;
+
+
+	while (ptr)
+	{
+		if (ptr->ifa_flags & IFF_RUNNING && !(ptr->ifa_flags & IFF_LOOPBACK))  // verifie si interface active +  est ce que cest un lo (loopback)   si non  = eth0 (notre interface)
+			break;
+		ptr = ptr->ifa_next;
+	}
+	if (!ptr)
+	{
+		printf("no interface found\n");
+		freeifaddrs(ifaddr);
+		return 1;
+	}
+
+	int ifindex =  if_nametoindex(ptr->ifa_name); // prend l index numerique de l interface eth0 (2 par exemple)
+
+
+
+	struct sockaddr_ll sll; // decrit adresse layer 2 : arp/ethernet
+	sll.sll_family   = AF_PACKET; // uint16_t qui dit au kernetl cest une addresse 2 ethernet
+	sll.sll_protocol = htons(ETH_P_ARP); //  from little to big endiant  pour stocker ETH p arp protocl
+	sll.sll_ifindex  = ifindex; // index de notre interface
+	if (bind(sockfd, (struct sockaddr *)&sll, sizeof(sll)) < 0) //  bind = syscall  qui dit lie le socket a cette interface on va ecouter tout dessus plus tard
+	{
+		perror("bind");
+		return 1;
+	}
+	
+	freeifaddrs(ifaddr); // free
+
+
+
+
+	uint8_t buffer[42]; // taille exacte d'une trame ARP
+	if (recvfrom(sockfd, buffer, sizeof(buffer), 0, NULL, NULL) < 0) 	// syscall bloquant, process en sleeping dans kernel : maj renvoit copie des recu en buffer.       taille maxa lire, pas de flag,  pas de source pour savoir qui a send, pas  de taille de la source.
+	{
+		perror("recvfrom");
+		return 1;
+	}
+	
+	
+	
+	
+
+	// PAS DE STRUCT pour recevoir les trames  comme on veut donc faut la rebuild non meme.
+	
+	
+	
+	struct ethernet_header *eth = (struct ethernet_header *)buffer;  // on prent les 14 premier octet du buffer et ils vont dans la structure (contigue d octet une structure en realite)
+	struct arp_packet *arp = (struct arp_packet *)(buffer + 14); // les restat dans la partie tram arp
+	
+	
 	return 0;
 }

@@ -1,0 +1,17 @@
+
+
+
+Socket = un file descriptor
+
+
+
+
+La carte reseau recoit des signaux Wifi/Electrique et les convertie en BYTE dans la RAM
+
+
+
+
+Le socket est un fd qui demande au kernel de creer une structure pour recevoir ces influx de connexion et les ecouter.
+cest un waiter par le kernel. 
+
+ici vera les trames/paquets isoles recu.
