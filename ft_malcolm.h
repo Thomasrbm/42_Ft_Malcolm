@@ -10,8 +10,8 @@
 #include <linux/if_packet.h>
 #include <net/if.h>
 #include <linux/if.h>
-
-
+#include <string.h>
+#include <stdlib.h>
 
 
 struct ethernet_header {
