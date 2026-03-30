@@ -91,7 +91,7 @@ int main(int ac, char **av)
 
 
 	struct ifaddrs *ifaddr; // besoin de  struct sockaddr_ll  pour 
-	if (getifaddrs(&ifaddr) < 0)// demande au kernell tout les interface reseaux actives, remplit une liste chaine avec tout 
+	if (getifaddrs(&ifaddr) < 0) // demande au kernell tout les interface reseaux actives, remplit une liste chaine avec tout 
 	{
 		perror("getifaddrs");
 		return 1;
